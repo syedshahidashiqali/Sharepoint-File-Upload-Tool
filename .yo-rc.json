@@ -1,0 +1,16 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "version": "1.14.0",
+    "libraryName": "file-uploading-tool",
+    "libraryId": "ab7b2103-1fe8-4773-98a2-602f3fb7d1ab",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "file-uploading-tool",
+    "solutionShortDescription": "file-uploading-tool description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}
