@@ -10,6 +10,7 @@ import { BaseClientSideWebPart } from "@microsoft/sp-webpart-base";
 import * as strings from "FileUploadingToolWebPartStrings";
 import FileUploadingTool from "./components/FileUploadingTool";
 import { IFileUploadingToolProps } from "./components/IFileUploadingToolProps";
+import { getSP } from "./pnpjsConfig";
 
 export interface IFileUploadingToolWebPartProps {
   description: string;
@@ -19,10 +20,14 @@ export interface IFileUploadingToolWebPartProps {
 export default class FileUploadingToolWebPart extends BaseClientSideWebPart<IFileUploadingToolWebPartProps> {
   private _environmentMessage: string = "";
 
-  protected onInit(): Promise<void> {
+  public async onInit(): Promise<void> {
     this._environmentMessage = this._getEnvironmentMessage();
 
-    return super.onInit();
+    await super.onInit();
+
+    //Initialize our _sp object that we can then use in other packages without having to pass around the context.
+    // Check out pnpjsConfig.ts for an example of a project setup file.
+    getSP(this.context);
   }
 
   public render(): void {
