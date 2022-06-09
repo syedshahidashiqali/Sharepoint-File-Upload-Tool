@@ -1,0 +1,46 @@
+@import "~office-ui-fabric-react/dist/sass/References.scss";
+
+.fileUploadingToolWrapper {
+  .headingWrapper {
+    position: relative;
+    h1 {
+      position: relative;
+      font-size: 24px;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: -2px;
+        bottom: -5px;
+        width: 26%;
+        height: 2px;
+        border-bottom: 3px solid #3aaef9;
+      }
+    }
+  }
+
+  button.submitBtn {
+    background-color: #4bcf4b;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 25px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  button.cancelBtn {
+    background-color: #c3c9c3;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 25px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-right: 20px;
+  }
+  // input[type="file"]::-webkit-file-upload-button {
+  //   background: black;
+  //   color: red;
+  //   padding: 1em;
+  // }
+}

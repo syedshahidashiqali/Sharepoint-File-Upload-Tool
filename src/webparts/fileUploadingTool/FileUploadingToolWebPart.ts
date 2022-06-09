@@ -11,6 +11,7 @@ import * as strings from "FileUploadingToolWebPartStrings";
 import FileUploadingTool from "./components/FileUploadingTool";
 import { IFileUploadingToolProps } from "./components/IFileUploadingToolProps";
 import { getSP } from "./pnpjsConfig";
+import "../../../node_modules/office-ui-fabric-core/src/sass/Fabric.scss";
 
 export interface IFileUploadingToolWebPartProps {
   description: string;
