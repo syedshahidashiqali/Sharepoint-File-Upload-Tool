@@ -4,6 +4,8 @@ import { IFileUploadingToolProps } from "./IFileUploadingToolProps";
 import { Container } from "./tinyComponents/Container";
 import { Row } from "./tinyComponents/Row";
 import { Col } from "./tinyComponents/Col";
+import { useState, useEffect } from "react";
+import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
 // office ui components
 import {
@@ -12,9 +14,80 @@ import {
   Dropdown,
   DatePicker,
   Toggle,
+  IDropdownOption,
 } from "office-ui-fabric-react";
 
+// export interface IFileUploadToolState {
+//   Title: string;
+//   DocType: any;
+//   Categories: any;
+//   Status: any;
+//   DocTypeValue: string;
+//   Department: string;
+//   SecurityLevel: string;
+//   Date: string;
+//   Comment: string;
+//   Version: string;
+//   DateUploaded: string;
+//   Timeline: string;
+//   DocumentOwner: any;
+//   BussinessOwner: any;
+//   PrimaryApproval: any;
+//   SecondaryApproval: any;
+//   Acknowledgment: any;
+//   _DocTypesOptions: any;
+//   _DepartmentsOptions: any;
+//   _SecurityLevelOptions: any;
+//   _ExpiryTimelineOptions: any;
+// }
+
 const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
+  const [documentTitle, setDocumentTitle] = useState<string>("");
+  const [documentTypeOptions, setDocumentTypeOptions] = useState<any>([]);
+  const [documentTypeValue, setDocumentTypeValue] = useState<
+    IDropdownOption | ""
+  >("");
+
+  // First field document name Handler
+  const documentTitleChangeHandler = React.useCallback(
+    (
+      event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
+      newValue?: string
+    ) => {
+      if (!newValue || newValue.length <= 5) {
+        setDocumentTitle(newValue || "");
+      }
+    },
+    []
+  );
+
+  // docType input options fetcher func
+  const docType = (): Promise<any> => {
+    try {
+      let url: string = `${props.context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Drop Off Library')/fields?$filter=EntityPropertyName eq 'Document_x0020_Type'`;
+      return props.context.spHttpClient
+        .get(url, SPHttpClient.configurations.v1)
+        .then((response: SPHttpClientResponse) => {
+          if (response.ok) {
+            return response.json();
+          }
+        });
+    } catch (error) {
+      console.log("Doc Type Error: ", error);
+    }
+  };
+
+  useEffect(() => {
+    docType().then((response) => {
+      const values = response.value[0].Choices.map((item, index) => ({
+        key: item,
+        text: item,
+      }));
+      setDocumentTypeOptions(values);
+    });
+  }, []);
+  console.log("options", documentTypeOptions);
+  console.log("value", documentTypeValue);
   return (
     <section className="fileUploadingToolWrapper">
       <Container>
@@ -32,7 +105,10 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                 <Label htmlFor="documentName" required>
                   Document Name
                 </Label>
-                <TextField id="documentName" />
+                <TextField
+                  id="documentName"
+                  onChange={documentTitleChangeHandler}
+                />
               </div>
             </Col>
             <Col lg={6} md={6} sm={12}>
@@ -40,14 +116,12 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                 <Dropdown
                   label="Document Type"
                   placeholder="Select Doc Type"
-                  options={[
-                    { key: "A", text: "Option a", title: "I am option a." },
-                    { key: "B", text: "Option b" },
-                    { key: "C", text: "Option c" },
-                    { key: "D", text: "Option d" },
-                    { key: "E", text: "Option e" },
-                  ]}
+                  options={documentTypeOptions}
                   required={true}
+                  onChange={(
+                    event: React.FormEvent<HTMLDivElement>,
+                    item: IDropdownOption
+                  ): void => setDocumentTypeValue(item)}
                 />
               </div>
             </Col>
