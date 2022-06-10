@@ -47,6 +47,10 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
   const [documentTypeValue, setDocumentTypeValue] = useState<
     IDropdownOption | ""
   >("");
+  const [departmentOptions, setDepartmentOptions] = useState<any>([]);
+  const [departmentValue, setDepartmentValue] = useState<IDropdownOption | "">(
+    ""
+  );
 
   // First field document name Handler
   const documentTitleChangeHandler = React.useCallback(
@@ -62,7 +66,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
   );
 
   // docType input options fetcher func
-  const docType = (): Promise<any> => {
+  const getDocType = (): Promise<any> => {
     try {
       let url: string = `${props.context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Drop Off Library')/fields?$filter=EntityPropertyName eq 'Document_x0020_Type'`;
       return props.context.spHttpClient
@@ -77,17 +81,41 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
     }
   };
 
+  // docType input options fetcher func
+  const getDepartment = (): Promise<any> => {
+    try {
+      let url: string = `${props.context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Drop Off Library')/fields?$filter=EntityPropertyName eq 'Department'`;
+      return props.context.spHttpClient
+        .get(url, SPHttpClient.configurations.v1)
+        .then((response: SPHttpClientResponse) => {
+          if (response.ok) {
+            return response.json();
+          }
+        });
+    } catch (error) {
+      console.log("Doc Type Error: ", error);
+    }
+  };
+
   useEffect(() => {
-    docType().then((response) => {
+    // Fetching Doc Type data
+    getDocType().then((response) => {
       const values = response.value[0].Choices.map((item, index) => ({
         key: item,
         text: item,
       }));
       setDocumentTypeOptions(values);
     });
+
+    // Fetching Departments data
+    getDepartment().then((response) => {
+      const values = response.value[0].Choices.map((item, index) => ({
+        key: item,
+        text: item,
+      }));
+      setDepartmentOptions(values);
+    });
   }, []);
-  console.log("options", documentTypeOptions);
-  console.log("value", documentTypeValue);
   return (
     <section className="fileUploadingToolWrapper">
       <Container>
@@ -132,14 +160,12 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                 <Dropdown
                   label="Department"
                   placeholder="Select Department"
-                  options={[
-                    { key: "A", text: "Option a", title: "I am option a." },
-                    { key: "B", text: "Option b" },
-                    { key: "C", text: "Option c" },
-                    { key: "D", text: "Option d" },
-                    { key: "E", text: "Option e" },
-                  ]}
+                  options={departmentOptions}
                   required={true}
+                  onChange={(
+                    event: React.FormEvent<HTMLDivElement>,
+                    item: IDropdownOption
+                  ): void => setDepartmentValue(item)}
                 />
               </div>
             </Col>
