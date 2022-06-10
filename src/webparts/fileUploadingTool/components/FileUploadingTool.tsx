@@ -51,6 +51,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
   const [departmentValue, setDepartmentValue] = useState<IDropdownOption | "">(
     ""
   );
+  const [documentVersion, setDocumentVersion] = useState<string>("");
 
   // First field document name Handler
   const documentTitleChangeHandler = React.useCallback(
@@ -60,6 +61,18 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
     ) => {
       if (!newValue || newValue.length <= 5) {
         setDocumentTitle(newValue || "");
+      }
+    },
+    []
+  );
+  // Fourth field document version Handler
+  const documentVersionChangeHandler = React.useCallback(
+    (
+      event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
+      newValue?: string
+    ) => {
+      if (!newValue || newValue.length <= 5) {
+        setDocumentVersion(newValue || "");
       }
     },
     []
@@ -174,7 +187,10 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                 <Label htmlFor="documentVersion" required>
                   Version
                 </Label>
-                <TextField id="documentVersion" />
+                <TextField
+                  id="documentVersion"
+                  onChange={documentVersionChangeHandler}
+                />
               </div>
             </Col>
           </Row>
