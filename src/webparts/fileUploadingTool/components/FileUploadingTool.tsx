@@ -59,6 +59,10 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
   const [uploadedDate, setUploadedDate] = React.useState<Date | undefined>();
   const [expiryDate, setExpiryDate] = React.useState<Date | undefined>();
   const [acknowledgement, setAcknowledgement] = React.useState<boolean>(false);
+  const [expiryTimelineOptions, setExpiryTimelineOptions] = useState<any>([]);
+  const [expiryTimelineValue, setExpiryTimelineValue] = useState<
+    IDropdownOption | ""
+  >("");
 
   // First field document name Handler
   const documentTitleChangeHandler = React.useCallback(
@@ -133,6 +137,22 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
     }
   };
 
+  // expiry timeline  input options fetcher func
+  const getExpiryTimeline = (): Promise<any> => {
+    try {
+      let url: string = `${props.context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Drop Off Library')/fields?$filter=EntityPropertyName eq 'Expiry_x0020_Timeline'`;
+      return props.context.spHttpClient
+        .get(url, SPHttpClient.configurations.v1)
+        .then((response: SPHttpClientResponse) => {
+          if (response.ok) {
+            return response.json();
+          }
+        });
+    } catch (error) {
+      console.log("GET Expiry timeline Error: ", error);
+    }
+  };
+
   useEffect(() => {
     // Fetching Doc Type data
     getDocType().then((response) => {
@@ -159,6 +179,15 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
         text: item,
       }));
       setSecurityLevelOptions(values);
+    });
+
+    // Fetching security level data
+    getExpiryTimeline().then((response) => {
+      const values = response.value[0].Choices.map((item, index) => ({
+        key: item,
+        text: item,
+      }));
+      setExpiryTimelineOptions(values);
     });
   }, []);
   return (
@@ -317,14 +346,12 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                 <Dropdown
                   label="Expiry Timeline"
                   placeholder="Select Expiry Timeline"
-                  options={[
-                    { key: "A", text: "Option a", title: "I am option a." },
-                    { key: "B", text: "Option b" },
-                    { key: "C", text: "Option c" },
-                    { key: "D", text: "Option d" },
-                    { key: "E", text: "Option e" },
-                  ]}
+                  options={expiryTimelineOptions}
                   required={true}
+                  onChange={(
+                    event: React.FormEvent<HTMLDivElement>,
+                    item: IDropdownOption
+                  ): void => setExpiryTimelineValue(item)}
                 />
               </div>
             </Col>
