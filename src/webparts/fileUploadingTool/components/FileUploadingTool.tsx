@@ -58,6 +58,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
   >("");
   const [uploadedDate, setUploadedDate] = React.useState<Date | undefined>();
   const [expiryDate, setExpiryDate] = React.useState<Date | undefined>();
+  const [acknowledgement, setAcknowledgement] = React.useState<boolean>(false);
 
   // First field document name Handler
   const documentTitleChangeHandler = React.useCallback(
@@ -302,7 +303,10 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   label={<div>Acknowledgement</div>}
                   // onText="On"
                   // offText="Off"
-                  // onChange={(e) => console.log(e)}
+                  onChange={(
+                    ev: React.MouseEvent<HTMLElement>,
+                    checked?: boolean
+                  ): void => setAcknowledgement(checked)}
                 />
               </div>
             </Col>
