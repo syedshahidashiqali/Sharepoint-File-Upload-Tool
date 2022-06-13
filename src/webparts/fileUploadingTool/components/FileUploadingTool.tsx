@@ -52,6 +52,12 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
     ""
   );
   const [documentVersion, setDocumentVersion] = useState<string>("");
+  const [securityLevelOptions, setSecurityLevelOptions] = useState<any>([]);
+  const [securityLevelValue, setSecurityLevelValue] = useState<
+    IDropdownOption | ""
+  >("");
+  const [uploadedDate, setUploadedDate] = React.useState<Date | undefined>();
+  const [expiryDate, setExpiryDate] = React.useState<Date | undefined>();
 
   // First field document name Handler
   const documentTitleChangeHandler = React.useCallback(
@@ -94,7 +100,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
     }
   };
 
-  // docType input options fetcher func
+  // department input options fetcher func
   const getDepartment = (): Promise<any> => {
     try {
       let url: string = `${props.context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Drop Off Library')/fields?$filter=EntityPropertyName eq 'Department'`;
@@ -107,6 +113,22 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
         });
     } catch (error) {
       console.log("Doc Type Error: ", error);
+    }
+  };
+
+  // security level input options fetcher func
+  const getSecurityLevel = (): Promise<any> => {
+    try {
+      let url: string = `${props.context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Drop Off Library')/fields?$filter=EntityPropertyName eq 'Security_x0020_Level'`;
+      return props.context.spHttpClient
+        .get(url, SPHttpClient.configurations.v1)
+        .then((response: SPHttpClientResponse) => {
+          if (response.ok) {
+            return response.json();
+          }
+        });
+    } catch (error) {
+      console.log("Get Security Level Error: ", error);
     }
   };
 
@@ -127,6 +149,15 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
         text: item,
       }));
       setDepartmentOptions(values);
+    });
+
+    // Fetching security level data
+    getSecurityLevel().then((response) => {
+      const values = response.value[0].Choices.map((item, index) => ({
+        key: item,
+        text: item,
+      }));
+      setSecurityLevelOptions(values);
     });
   }, []);
   return (
@@ -212,16 +243,14 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
             <Col lg={6} md={6} sm={12}>
               <div className="inputWrapper" style={{ marginTop: "5px" }}>
                 <Dropdown
-                  label="Department"
-                  placeholder="Select Department"
-                  options={[
-                    { key: "A", text: "Option a", title: "I am option a." },
-                    { key: "B", text: "Option b" },
-                    { key: "C", text: "Option c" },
-                    { key: "D", text: "Option d" },
-                    { key: "E", text: "Option e" },
-                  ]}
+                  label="Security Level"
+                  placeholder="Select Security Level"
+                  options={securityLevelOptions}
                   required={true}
+                  onChange={(
+                    event: React.FormEvent<HTMLDivElement>,
+                    item: IDropdownOption
+                  ): void => setSecurityLevelValue(item)}
                 />
               </div>
             </Col>
@@ -247,7 +276,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   allowTextInput
                   ariaLabel="Select a date. Input format is day slash month slash year."
                   // value={value}
-                  // onSelectDate={setValue as (date?: Date) => void}
+                  onSelectDate={setUploadedDate as (date?: Date) => void}
                   // formatDate={onFormatDate}
                 />
               </div>
@@ -262,7 +291,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   allowTextInput
                   ariaLabel="Select a date. Input format is day slash month slash year."
                   // value={value}
-                  // onSelectDate={setValue as (date?: Date) => void}
+                  onSelectDate={setExpiryDate as (date?: Date) => void}
                   // formatDate={onFormatDate}
                 />
               </div>
