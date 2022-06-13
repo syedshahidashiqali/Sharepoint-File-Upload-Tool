@@ -64,6 +64,8 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
     IDropdownOption | ""
   >("");
 
+  const inputFileRef = React.useRef<HTMLInputElement | null>(null);
+
   // First field document name Handler
   const documentTitleChangeHandler = React.useCallback(
     (
@@ -181,7 +183,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
       setSecurityLevelOptions(values);
     });
 
-    // Fetching security level data
+    // Fetching expiry timeline data
     getExpiryTimeline().then((response) => {
       const values = response.value[0].Choices.map((item, index) => ({
         key: item,
@@ -358,7 +360,13 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
             <Col lg={6} md={6} sm={12}>
               <div className="inputWrapper" style={{ marginTop: "5px" }}>
                 <Label htmlFor="fileInput">Attachment(Document)</Label>
-                <input type="file" id="fileInput" size={20} />
+                <input
+                  type="file"
+                  id="fileInput"
+                  size={20}
+                  ref={inputFileRef}
+                  onChange={(e) => console.log(inputFileRef.current.files[0])}
+                />
               </div>
             </Col>
           </Row>
