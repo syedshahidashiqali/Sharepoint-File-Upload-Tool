@@ -6,7 +6,18 @@ import { Row } from "./tinyComponents/Row";
 import { Col } from "./tinyComponents/Col";
 import { useState, useEffect } from "react";
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import { getSP } from "../pnpjsConfig";
+import { Caching, ICachingProps } from "@pnp/queryable";
+import { SPFI, spfi } from "@pnp/sp";
+import { Logger, LogLevel } from "@pnp/logging";
+import "@pnp/sp/webs";
+import "@pnp/sp/files";
+import "@pnp/sp/folders";
 
+// var _sp: SPFI;
+// const cacheProps: ICachingProps = {
+//   store: "session",
+// };
 // office ui components
 import {
   Label,
@@ -42,15 +53,20 @@ import {
 // }
 
 const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
+  // _sp = getSP();
   const [documentTitle, setDocumentTitle] = useState<string>("");
-  const [documentTypeOptions, setDocumentTypeOptions] = useState<any>([]);
+  const [documentTypeOptions, setDocumentTypeOptions] = useState<
+    [] | IDropdownOption[]
+  >([]);
   const [documentTypeValue, setDocumentTypeValue] = useState<
-    IDropdownOption | ""
+    IDropdownOption | string
   >("");
-  const [departmentOptions, setDepartmentOptions] = useState<any>([]);
-  const [departmentValue, setDepartmentValue] = useState<IDropdownOption | "">(
-    ""
-  );
+  const [departmentOptions, setDepartmentOptions] = useState<
+    [] | IDropdownOption[]
+  >([]);
+  const [departmentValue, setDepartmentValue] = useState<
+    IDropdownOption | string
+  >("");
   const [documentVersion, setDocumentVersion] = useState<string>("");
   const [securityLevelOptions, setSecurityLevelOptions] = useState<any>([]);
   const [securityLevelValue, setSecurityLevelValue] = useState<
@@ -71,11 +87,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
     (
       event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
       newValue?: string
-    ) => {
-      if (!newValue || newValue.length <= 5) {
-        setDocumentTitle(newValue || "");
-      }
-    },
+    ) => setDocumentTitle(newValue || ""),
     []
   );
   // Fourth field document version Handler
@@ -83,11 +95,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
     (
       event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
       newValue?: string
-    ) => {
-      if (!newValue || newValue.length <= 5) {
-        setDocumentVersion(newValue || "");
-      }
-    },
+    ) => setDocumentVersion(newValue || ""),
     []
   );
 
@@ -192,6 +200,81 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
       setExpiryTimelineOptions(values);
     });
   }, []);
+
+  const submitFormHandler = async () => {
+    console.log(201, documentTypeValue);
+    const file = inputFileRef.current.files[0];
+    if (documentTitle === "") {
+      alert("Please fill required fields");
+    } else {
+      // Upload a file to the SharePoint Library
+      var url = props.context.pageContext.web.serverRelativeUrl;
+      const fileObj = await getSP(props.context)
+        .web.getFolderByServerRelativePath(`${url}/gf_dropOffLibrary`)
+        .files.addUsingPath(file.name, file, { Overwrite: true });
+      // .then((data) => console.log(219, data));
+
+      const item = await fileObj.file.getItem();
+      await item.update({
+        DocumentName: documentTitle,
+        Document_x0020_Type: documentTypeValue,
+        Department: departmentValue,
+        // Title: "A Title",
+        // OtherField: "My Other Value"
+      });
+    }
+  };
+  // const uploadFileFromControl = () => {
+  // const spCache = spfi(_sp).using(Caching(cacheProps));
+  // const sp = spfi(_sp);
+  // Get the file from File DOM
+  // const files = inputFileRef.current;
+  // const file = files[0];
+  // if (documentTitle == "") {
+  //   alert("Please fill required fields");
+  // }
+  // else {
+  //   //Upload a file to the SharePoint Library
+  // var url = props.context.pageContext.web.serverRelativeUrl;
+  // sp.web.getFolderByServerRelativePath(`${url}/gf_dropOffLibrary`);
+  // getSP(props.context).web.getFileByServerRelativePath
+
+  // sp.web.getFolderByServerRelativeUrl(url + "/gf_dropOffLibrary")
+  // getSP(props.context).web;
+  // const sp = spCache.web;
+  //     .files.add(file.name, file, true)
+  //     .then((data) => {
+  //       data.file.listItemAllFields.get().then((listItemAllFields) => {
+  //         console.log("data", listItemAllFields.Id);
+  //         sp.web.lists.getByTitle("Drop Off Library").items.getById(listItemAllFields.Id).update({
+  //           gf_documentName: this.state.Title,
+  //           gf_documentType: this.state.DocTypeValue,
+  //           gf_department: this.state.Department,
+  //           gf_version: this.state.Version,
+  //           gf_securityLevel: this.state.SecurityLevel,
+  //           gf_expirydate: new Date(this.state.Date),
+  //          gf_documentOwnerId: DocOwnerId ,
+  //           gf_businessOwnerId:  BussinessOwnerId,
+  //           gf_primaryApproverId: PrimaryApprovalId ,
+  //           gf_secondaryApproverId:  SecondaryApprovalId ,
+  //           gf_dateUploaded: new Date(this.state.DateUploaded),
+  //           gf_expiryTimeline: this.state.Timeline,
+  //           gf_acknowledgment: this.state.Acknowledgment == true ? "Yes" : "No",
+  //           gf_status: "Draft"
+
+  //         }).then(r => {
+  //           alert("File uploaded sucessfully");
+  //           location.reload();
+  //         });
+
+  //       });
+
+  //     })
+  //     .catch((error) => {
+  //       alert("Error is uploading");
+  //     });
+  // }
+  // };
   return (
     <section className="fileUploadingToolWrapper">
       <Container>
@@ -225,7 +308,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   onChange={(
                     event: React.FormEvent<HTMLDivElement>,
                     item: IDropdownOption
-                  ): void => setDocumentTypeValue(item)}
+                  ): void => setDocumentTypeValue(item.key as string)}
                 />
               </div>
             </Col>
@@ -241,7 +324,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   onChange={(
                     event: React.FormEvent<HTMLDivElement>,
                     item: IDropdownOption
-                  ): void => setDepartmentValue(item)}
+                  ): void => setDepartmentValue(item.key as string)}
                 />
               </div>
             </Col>
@@ -261,7 +344,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
             <Col lg={6} md={6} sm={12}>
               <div className="inputWrapper" style={{ marginTop: "5px" }}>
                 <Label htmlFor="documentOwner">Document Owner</Label>
-                <TextField id="documentOwner" />
+                <TextField id="documentOwner" onChange={submitFormHandler} />
               </div>
             </Col>
             <Col lg={6} md={6} sm={12}>
@@ -307,7 +390,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   label="Date Uploaded"
                   allowTextInput
                   ariaLabel="Select a date. Input format is day slash month slash year."
-                  // value={value}
+                  value={uploadedDate}
                   onSelectDate={setUploadedDate as (date?: Date) => void}
                   // formatDate={onFormatDate}
                 />
@@ -322,7 +405,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   label="Expiry Date"
                   allowTextInput
                   ariaLabel="Select a date. Input format is day slash month slash year."
-                  // value={value}
+                  value={expiryDate}
                   onSelectDate={setExpiryDate as (date?: Date) => void}
                   // formatDate={onFormatDate}
                 />
@@ -365,7 +448,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   id="fileInput"
                   size={20}
                   ref={inputFileRef}
-                  onChange={(e) => console.log(inputFileRef.current.files[0])}
+                  // onChange={(e) => console.log(inputFileRef.current.files[0])}
                 />
               </div>
             </Col>
