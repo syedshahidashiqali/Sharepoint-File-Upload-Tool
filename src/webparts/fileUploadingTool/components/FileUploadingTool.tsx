@@ -7,17 +7,13 @@ import { Col } from "./tinyComponents/Col";
 import { useState, useEffect } from "react";
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { getSP } from "../pnpjsConfig";
-import { Caching, ICachingProps } from "@pnp/queryable";
-import { SPFI, spfi } from "@pnp/sp";
-import { Logger, LogLevel } from "@pnp/logging";
+// import { Caching, ICachingProps } from "@pnp/queryable";
+// import { SPFI, spfi } from "@pnp/sp";
+// import { Logger, LogLevel } from "@pnp/logging";
 import "@pnp/sp/webs";
 import "@pnp/sp/files";
 import "@pnp/sp/folders";
 
-// var _sp: SPFI;
-// const cacheProps: ICachingProps = {
-//   store: "session",
-// };
 // office ui components
 import {
   Label,
@@ -27,6 +23,7 @@ import {
   Toggle,
   IDropdownOption,
 } from "office-ui-fabric-react";
+import { IItemUpdateResult } from "@pnp/sp/items";
 
 // export interface IFileUploadToolState {
 //   Title: string;
@@ -53,7 +50,6 @@ import {
 // }
 
 const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
-  // _sp = getSP();
   const [documentTitle, setDocumentTitle] = useState<string>("");
   const [documentTypeOptions, setDocumentTypeOptions] = useState<
     [] | IDropdownOption[]
@@ -68,16 +64,20 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
     IDropdownOption | string
   >("");
   const [documentVersion, setDocumentVersion] = useState<string>("");
-  const [securityLevelOptions, setSecurityLevelOptions] = useState<any>([]);
+  const [securityLevelOptions, setSecurityLevelOptions] = useState<
+    [] | IDropdownOption[]
+  >([]);
   const [securityLevelValue, setSecurityLevelValue] = useState<
-    IDropdownOption | ""
+    IDropdownOption | string
   >("");
   const [uploadedDate, setUploadedDate] = React.useState<Date | undefined>();
   const [expiryDate, setExpiryDate] = React.useState<Date | undefined>();
   const [acknowledgement, setAcknowledgement] = React.useState<boolean>(false);
-  const [expiryTimelineOptions, setExpiryTimelineOptions] = useState<any>([]);
+  const [expiryTimelineOptions, setExpiryTimelineOptions] = useState<
+    [] | IDropdownOption[]
+  >([]);
   const [expiryTimelineValue, setExpiryTimelineValue] = useState<
-    IDropdownOption | ""
+    IDropdownOption | string
   >("");
 
   const inputFileRef = React.useRef<HTMLInputElement | null>(null);
@@ -201,80 +201,37 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
     });
   }, []);
 
-  const submitFormHandler = async () => {
-    console.log(201, documentTypeValue);
+  const submitFormHandler = () => {
     const file = inputFileRef.current.files[0];
     if (documentTitle === "") {
       alert("Please fill required fields");
     } else {
       // Upload a file to the SharePoint Library
       var url = props.context.pageContext.web.serverRelativeUrl;
-      const fileObj = await getSP(props.context)
+      getSP(props.context)
         .web.getFolderByServerRelativePath(`${url}/gf_dropOffLibrary`)
-        .files.addUsingPath(file.name, file, { Overwrite: true });
-      // .then((data) => console.log(219, data));
-
-      const item = await fileObj.file.getItem();
-      await item.update({
-        DocumentName: documentTitle,
-        Document_x0020_Type: documentTypeValue,
-        Department: departmentValue,
-        // Title: "A Title",
-        // OtherField: "My Other Value"
-      });
+        .files.addUsingPath(file.name, file, { Overwrite: true })
+        .then((data) => {
+          const fileObj = data.file.getItem();
+          fileObj.then((obj) => {
+            console.log("hey...", obj);
+            obj
+              .update({
+                DocumentName: documentTitle,
+                Document_x0020_Type: documentTypeValue,
+                Department: departmentValue,
+                gf_version: documentVersion,
+                Security_x0020_Level: securityLevelValue,
+                Date_x0020_Uploaded: uploadedDate,
+                Expiry_x0020_date: expiryDate,
+                Expiry_x0020_Timeline: expiryTimelineValue,
+                Acknowledgement: acknowledgement === true ? "Yes" : "No",
+              })
+              .catch((err) => console.log("ress error iss:", err));
+          });
+        });
     }
   };
-  // const uploadFileFromControl = () => {
-  // const spCache = spfi(_sp).using(Caching(cacheProps));
-  // const sp = spfi(_sp);
-  // Get the file from File DOM
-  // const files = inputFileRef.current;
-  // const file = files[0];
-  // if (documentTitle == "") {
-  //   alert("Please fill required fields");
-  // }
-  // else {
-  //   //Upload a file to the SharePoint Library
-  // var url = props.context.pageContext.web.serverRelativeUrl;
-  // sp.web.getFolderByServerRelativePath(`${url}/gf_dropOffLibrary`);
-  // getSP(props.context).web.getFileByServerRelativePath
-
-  // sp.web.getFolderByServerRelativeUrl(url + "/gf_dropOffLibrary")
-  // getSP(props.context).web;
-  // const sp = spCache.web;
-  //     .files.add(file.name, file, true)
-  //     .then((data) => {
-  //       data.file.listItemAllFields.get().then((listItemAllFields) => {
-  //         console.log("data", listItemAllFields.Id);
-  //         sp.web.lists.getByTitle("Drop Off Library").items.getById(listItemAllFields.Id).update({
-  //           gf_documentName: this.state.Title,
-  //           gf_documentType: this.state.DocTypeValue,
-  //           gf_department: this.state.Department,
-  //           gf_version: this.state.Version,
-  //           gf_securityLevel: this.state.SecurityLevel,
-  //           gf_expirydate: new Date(this.state.Date),
-  //          gf_documentOwnerId: DocOwnerId ,
-  //           gf_businessOwnerId:  BussinessOwnerId,
-  //           gf_primaryApproverId: PrimaryApprovalId ,
-  //           gf_secondaryApproverId:  SecondaryApprovalId ,
-  //           gf_dateUploaded: new Date(this.state.DateUploaded),
-  //           gf_expiryTimeline: this.state.Timeline,
-  //           gf_acknowledgment: this.state.Acknowledgment == true ? "Yes" : "No",
-  //           gf_status: "Draft"
-
-  //         }).then(r => {
-  //           alert("File uploaded sucessfully");
-  //           location.reload();
-  //         });
-
-  //       });
-
-  //     })
-  //     .catch((error) => {
-  //       alert("Error is uploading");
-  //     });
-  // }
-  // };
   return (
     <section className="fileUploadingToolWrapper">
       <Container>
@@ -294,6 +251,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                 </Label>
                 <TextField
                   id="documentName"
+                  value={documentTitle}
                   onChange={documentTitleChangeHandler}
                 />
               </div>
@@ -335,6 +293,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                 </Label>
                 <TextField
                   id="documentVersion"
+                  value={documentVersion}
                   onChange={documentVersionChangeHandler}
                 />
               </div>
@@ -365,7 +324,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   onChange={(
                     event: React.FormEvent<HTMLDivElement>,
                     item: IDropdownOption
-                  ): void => setSecurityLevelValue(item)}
+                  ): void => setSecurityLevelValue(item.key as string)}
                 />
               </div>
             </Col>
@@ -415,8 +374,8 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
               <div className="inputWrapper" style={{ marginTop: "5px" }}>
                 <Toggle
                   label={<div>Acknowledgement</div>}
-                  // onText="On"
-                  // offText="Off"
+                  onText="Yes"
+                  offText="No"
                   onChange={(
                     ev: React.MouseEvent<HTMLElement>,
                     checked?: boolean
@@ -436,7 +395,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   onChange={(
                     event: React.FormEvent<HTMLDivElement>,
                     item: IDropdownOption
-                  ): void => setExpiryTimelineValue(item)}
+                  ): void => setExpiryTimelineValue(item.key as string)}
                 />
               </div>
             </Col>
