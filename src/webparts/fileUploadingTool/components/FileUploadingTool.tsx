@@ -195,7 +195,9 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
         .then((data) => {
           const fileObj = data.file.getItem();
           fileObj.then((obj) => {
-            console.log("hey...", obj);
+            alert(
+              "Thank You! Your Document has beed uploaded to the Sharepoint Document Library."
+            );
             obj
               .update({
                 DocumentName: documentTitle,
@@ -212,7 +214,12 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                 Primary_x0020_ApproverId: primaryApprover,
                 Secondary_x0020_ApproverId: secondaryApprover,
               })
-              .catch((err) => console.log("ress error iss:", err));
+              .catch((err) =>
+                console.log(
+                  "Error whle uploading the file to the Sharepoint Document Library:",
+                  err
+                )
+              );
           });
         });
     }
