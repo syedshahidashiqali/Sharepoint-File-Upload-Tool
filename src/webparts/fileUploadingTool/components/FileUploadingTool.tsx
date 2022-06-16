@@ -82,6 +82,10 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
 
   const [docOwner, setDocOwner] = useState<any[] | string>([]);
   const [businessOwner, setBusinessOwner] = useState<any[] | string>([]);
+  const [primaryApprover, setPrimaryApprover] = useState<any[] | string>([]);
+  const [secondaryApprover, setSecondaryApprover] = useState<any[] | string>(
+    []
+  );
 
   const inputFileRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -232,6 +236,8 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                 Acknowledgement: acknowledgement === true ? "Yes" : "No",
                 gf_DocumentOwnerId: docOwner,
                 Business_x0020_OwnerId: businessOwner,
+                Primary_x0020_ApproverId: primaryApprover,
+                Secondary_x0020_ApproverId: secondaryApprover,
               })
               .catch((err) => console.log("ress error iss:", err));
           });
@@ -362,16 +368,42 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
             </Col>
             <Col lg={6} md={6} sm={12}>
               <div className="inputWrapper" style={{ marginTop: "5px" }}>
-                <Label htmlFor="primaryApprover">Primary Approver</Label>
-                <TextField id="primaryApprover" />
+                <PeoplePicker
+                  context={props.context}
+                  titleText="Primary Approver"
+                  personSelectionLimit={1}
+                  // Leave this blank in case you want to filter from all users
+                  groupName={""}
+                  showtooltip={true}
+                  onChange={(items: any[]) => {
+                    setPrimaryApprover(items[0].id as string);
+                  }}
+                  showHiddenInUI={false}
+                  principalTypes={[PrincipalType.User]}
+                  resolveDelay={1000}
+                  ensureUser={true}
+                />
               </div>
             </Col>
           </Row>
           <Row>
             <Col lg={6} md={6} sm={12}>
               <div className="inputWrapper" style={{ marginTop: "5px" }}>
-                <Label htmlFor="secondaryApprover">Secondary Approver</Label>
-                <TextField id="secondaryApprover" />
+                <PeoplePicker
+                  context={props.context}
+                  titleText="Secondary Approver"
+                  personSelectionLimit={1}
+                  // Leave this blank in case you want to filter from all users
+                  groupName={""}
+                  showtooltip={true}
+                  onChange={(items: any[]) => {
+                    setSecondaryApprover(items[0].id as string);
+                  }}
+                  showHiddenInUI={false}
+                  principalTypes={[PrincipalType.User]}
+                  resolveDelay={1000}
+                  ensureUser={true}
+                />
               </div>
             </Col>
             <Col lg={6} md={6} sm={12}>
@@ -383,7 +415,6 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   ariaLabel="Select a date. Input format is day slash month slash year."
                   value={uploadedDate}
                   onSelectDate={setUploadedDate as (date?: Date) => void}
-                  // formatDate={onFormatDate}
                 />
               </div>
             </Col>
@@ -398,7 +429,6 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   ariaLabel="Select a date. Input format is day slash month slash year."
                   value={expiryDate}
                   onSelectDate={setExpiryDate as (date?: Date) => void}
-                  // formatDate={onFormatDate}
                 />
               </div>
             </Col>
@@ -439,7 +469,6 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                   id="fileInput"
                   size={20}
                   ref={inputFileRef}
-                  // onChange={(e) => console.log(inputFileRef.current.files[0])}
                 />
               </div>
             </Col>
