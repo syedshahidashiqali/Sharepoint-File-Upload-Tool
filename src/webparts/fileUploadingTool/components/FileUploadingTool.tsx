@@ -7,12 +7,13 @@ import { Col } from "./tinyComponents/Col";
 import { useState, useEffect } from "react";
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { getSP } from "../pnpjsConfig";
-// import { Caching, ICachingProps } from "@pnp/queryable";
-// import { SPFI, spfi } from "@pnp/sp";
-// import { Logger, LogLevel } from "@pnp/logging";
 import "@pnp/sp/webs";
 import "@pnp/sp/files";
 import "@pnp/sp/folders";
+import {
+  PeoplePicker,
+  PrincipalType,
+} from "@pnp/spfx-controls-react/lib/PeoplePicker";
 
 // office ui components
 import {
@@ -23,7 +24,6 @@ import {
   Toggle,
   IDropdownOption,
 } from "office-ui-fabric-react";
-import { IItemUpdateResult } from "@pnp/sp/items";
 
 // export interface IFileUploadToolState {
 //   Title: string;
@@ -79,6 +79,8 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
   const [expiryTimelineValue, setExpiryTimelineValue] = useState<
     IDropdownOption | string
   >("");
+
+  const [docOwner, setDocOwner] = useState<any[] | string>([]);
 
   const inputFileRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -201,7 +203,8 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
     });
   }, []);
 
-  const submitFormHandler = () => {
+  const submitFormHandler = (e) => {
+    e.preventDefault();
     const file = inputFileRef.current.files[0];
     if (documentTitle === "") {
       alert("Please fill required fields");
@@ -226,6 +229,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                 Expiry_x0020_date: expiryDate,
                 Expiry_x0020_Timeline: expiryTimelineValue,
                 Acknowledgement: acknowledgement === true ? "Yes" : "No",
+                gf_DocumentOwnerId: docOwner,
               })
               .catch((err) => console.log("ress error iss:", err));
           });
@@ -242,7 +246,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
             </div>
           </Col>
         </Row>
-        <form className="fileUploadingForm">
+        <form className="fileUploadingForm" onSubmit={submitFormHandler}>
           <Row>
             <Col lg={6} md={6} sm={12}>
               <div className="inputWrapper">
@@ -302,8 +306,21 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
           <Row>
             <Col lg={6} md={6} sm={12}>
               <div className="inputWrapper" style={{ marginTop: "5px" }}>
-                <Label htmlFor="documentOwner">Document Owner</Label>
-                <TextField id="documentOwner" onChange={submitFormHandler} />
+                <PeoplePicker
+                  context={props.context}
+                  titleText="Document Owner"
+                  personSelectionLimit={1}
+                  // Leave this blank in case you want to filter from all users
+                  groupName={""}
+                  showtooltip={true}
+                  onChange={(items: any[]) => {
+                    setDocOwner(items[0].id as string);
+                  }}
+                  showHiddenInUI={false}
+                  principalTypes={[PrincipalType.User]}
+                  resolveDelay={1000}
+                  ensureUser={true}
+                />
               </div>
             </Col>
             <Col lg={6} md={6} sm={12}>
