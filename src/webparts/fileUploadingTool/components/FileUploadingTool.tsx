@@ -10,10 +10,7 @@ import { getSP } from "../pnpjsConfig";
 import "@pnp/sp/webs";
 import "@pnp/sp/files";
 import "@pnp/sp/folders";
-import {
-  PeoplePicker,
-  PrincipalType,
-} from "@pnp/spfx-controls-react/lib/PeoplePicker";
+import { PersonPicker } from "./tinyComponents/PersonPicker";
 
 // office ui components
 import {
@@ -24,30 +21,6 @@ import {
   Toggle,
   IDropdownOption,
 } from "office-ui-fabric-react";
-
-// export interface IFileUploadToolState {
-//   Title: string;
-//   DocType: any;
-//   Categories: any;
-//   Status: any;
-//   DocTypeValue: string;
-//   Department: string;
-//   SecurityLevel: string;
-//   Date: string;
-//   Comment: string;
-//   Version: string;
-//   DateUploaded: string;
-//   Timeline: string;
-//   DocumentOwner: any;
-//   BussinessOwner: any;
-//   PrimaryApproval: any;
-//   SecondaryApproval: any;
-//   Acknowledgment: any;
-//   _DocTypesOptions: any;
-//   _DepartmentsOptions: any;
-//   _SecurityLevelOptions: any;
-//   _ExpiryTimelineOptions: any;
-// }
 
 const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
   const [documentTitle, setDocumentTitle] = useState<string>("");
@@ -314,39 +287,19 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
           <Row>
             <Col lg={6} md={6} sm={12}>
               <div className="inputWrapper" style={{ marginTop: "5px" }}>
-                <PeoplePicker
+                <PersonPicker
+                  LabelText="Document Owner"
                   context={props.context}
-                  titleText="Document Owner"
-                  personSelectionLimit={1}
-                  // Leave this blank in case you want to filter from all users
-                  groupName={""}
-                  showtooltip={true}
-                  onChange={(items: any[]) => {
-                    setDocOwner(items[0].id as string);
-                  }}
-                  showHiddenInUI={false}
-                  principalTypes={[PrincipalType.User]}
-                  resolveDelay={1000}
-                  ensureUser={true}
+                  setterFunc={setDocOwner}
                 />
               </div>
             </Col>
             <Col lg={6} md={6} sm={12}>
               <div className="inputWrapper" style={{ marginTop: "5px" }}>
-                <PeoplePicker
+                <PersonPicker
+                  LabelText="Business Owner"
                   context={props.context}
-                  titleText="Business Owner"
-                  personSelectionLimit={1}
-                  // Leave this blank in case you want to filter from all users
-                  groupName={""}
-                  showtooltip={true}
-                  onChange={(items: any[]) => {
-                    setBusinessOwner(items[0].id as string);
-                  }}
-                  showHiddenInUI={false}
-                  principalTypes={[PrincipalType.User]}
-                  resolveDelay={1000}
-                  ensureUser={true}
+                  setterFunc={setBusinessOwner}
                 />
               </div>
             </Col>
@@ -368,20 +321,10 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
             </Col>
             <Col lg={6} md={6} sm={12}>
               <div className="inputWrapper" style={{ marginTop: "5px" }}>
-                <PeoplePicker
+                <PersonPicker
+                  LabelText="Primary Approver"
                   context={props.context}
-                  titleText="Primary Approver"
-                  personSelectionLimit={1}
-                  // Leave this blank in case you want to filter from all users
-                  groupName={""}
-                  showtooltip={true}
-                  onChange={(items: any[]) => {
-                    setPrimaryApprover(items[0].id as string);
-                  }}
-                  showHiddenInUI={false}
-                  principalTypes={[PrincipalType.User]}
-                  resolveDelay={1000}
-                  ensureUser={true}
+                  setterFunc={setPrimaryApprover}
                 />
               </div>
             </Col>
@@ -389,20 +332,10 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
           <Row>
             <Col lg={6} md={6} sm={12}>
               <div className="inputWrapper" style={{ marginTop: "5px" }}>
-                <PeoplePicker
+                <PersonPicker
+                  LabelText="Secondary Approver"
                   context={props.context}
-                  titleText="Secondary Approver"
-                  personSelectionLimit={1}
-                  // Leave this blank in case you want to filter from all users
-                  groupName={""}
-                  showtooltip={true}
-                  onChange={(items: any[]) => {
-                    setSecondaryApprover(items[0].id as string);
-                  }}
-                  showHiddenInUI={false}
-                  principalTypes={[PrincipalType.User]}
-                  resolveDelay={1000}
-                  ensureUser={true}
+                  setterFunc={setSecondaryApprover}
                 />
               </div>
             </Col>
