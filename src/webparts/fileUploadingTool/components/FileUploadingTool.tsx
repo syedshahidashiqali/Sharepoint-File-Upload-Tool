@@ -81,6 +81,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
   >("");
 
   const [docOwner, setDocOwner] = useState<any[] | string>([]);
+  const [businessOwner, setBusinessOwner] = useState<any[] | string>([]);
 
   const inputFileRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -230,6 +231,7 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
                 Expiry_x0020_Timeline: expiryTimelineValue,
                 Acknowledgement: acknowledgement === true ? "Yes" : "No",
                 gf_DocumentOwnerId: docOwner,
+                Business_x0020_OwnerId: businessOwner,
               })
               .catch((err) => console.log("ress error iss:", err));
           });
@@ -325,8 +327,21 @@ const FileUploadingTool: React.FC<IFileUploadingToolProps> = (props) => {
             </Col>
             <Col lg={6} md={6} sm={12}>
               <div className="inputWrapper" style={{ marginTop: "5px" }}>
-                <Label htmlFor="bussinessOwner">Bussiness Owner</Label>
-                <TextField id="bussinessOwner" />
+                <PeoplePicker
+                  context={props.context}
+                  titleText="Business Owner"
+                  personSelectionLimit={1}
+                  // Leave this blank in case you want to filter from all users
+                  groupName={""}
+                  showtooltip={true}
+                  onChange={(items: any[]) => {
+                    setBusinessOwner(items[0].id as string);
+                  }}
+                  showHiddenInUI={false}
+                  principalTypes={[PrincipalType.User]}
+                  resolveDelay={1000}
+                  ensureUser={true}
+                />
               </div>
             </Col>
           </Row>
